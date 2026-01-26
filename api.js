@@ -4,8 +4,7 @@ const express = require('express');
 const cors = require('cors');  // cors = Cross Origin Resource Sharing means to allow request from the frontend to backend
 const logRequest = require('./logger'); // Import the logger middleware
 const validateTodo = require('./validator');
-const app = express();
-
+const app = express(); 
 // middleware to parse JSON bodies
 app.use(express.json());
 const corsOptions = {
