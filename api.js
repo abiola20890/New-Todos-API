@@ -2,6 +2,8 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');  // cors = Cross Origin Resource Sharing means to allow request from the frontend to backend
+const logRequest = require('./logger'); // Import the logger middleware
+const validateTodo = require('./validator');
 const app = express();
 
 // middleware to parse JSON bodies
@@ -13,6 +15,8 @@ const corsOptions = {
 
 
 app.use(cors(corsOptions));
+
+app.use(logRequest); // Use the logger middleware
 
 let todos = [
     //in memory data: array of objects
@@ -31,7 +35,7 @@ app.get('/todos', (req, res) => {
 });
 
 // POST
-app.post('/todos', (req, res) => {
+app.post('/todos', validateTodo, (req, res) => {
     const {task} = req.body;
     if (!task) {
         return res.status(400).json({ error: 'Task is required' });
