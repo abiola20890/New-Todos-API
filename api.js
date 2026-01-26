@@ -6,7 +6,13 @@ const app = express();
 
 // middleware to parse JSON bodies
 app.use(express.json());
-app.use(cors());
+const corsOptions = {
+    origin: 'http://localhost:5500', // Replace with your frontend URL
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+
+app.use(cors(corsOptions));
 
 let todos = [
     //in memory data: array of objects
