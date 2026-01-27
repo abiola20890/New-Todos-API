@@ -4,7 +4,8 @@ const express = require('express');
 const cors = require('cors');  // cors = Cross Origin Resource Sharing means to allow request from the frontend to backend
 const logRequest = require('./logger'); // Import the logger middleware
 const validateTodo = require('./validator');
-const errorHandler = require('./errorHandle');
+const errorHandler = require('./errorHandler');
+const patchvalidateTodo = require('./patchValidator');
 const app = express(); 
 // middleware to parse JSON bodies
 app.use(express.json());
@@ -76,7 +77,7 @@ app.get('/todos/:id', (req, res, next) => {
     // request.params is use only in id  because the id is path of the url
 
 // PATCH / partial update
-app.patch('/todos/:id', (req, res, next) => {
+app.patch('/todos/:id', patchvalidateTodo, (req, res, next) => {
    try {
      const Id = parseInt(req.params.id);
      if(isNaN(Id)){
@@ -118,7 +119,7 @@ app.get('/todos/completed', (req, res) => {
     }
 });
 
-app.use(require('./errorHandle')); // Import and use the error handling middleware
+app.use(require('./errorHandler')); // Import and use the error handling middleware
 
 const PORT = process.env.PORT || 3000;
 
