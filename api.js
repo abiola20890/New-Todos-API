@@ -35,7 +35,9 @@ app.get('/todos', (req, res) => {
 
 // POST
 app.post('/todos', validateTodo, (req, res) => {
-    const {task} = req.body;
+    try
+    {   
+      const {task} = req.body;
     if (!task) {
         return res.status(400).json({ error: 'Task is required' });
     }
@@ -45,43 +47,71 @@ app.post('/todos', validateTodo, (req, res) => {
         completed: false
     };
     todos.push(newTodo);
-    res.status(201).json(newTodo);
+    res.status(201).json(newTodo); // echo back the created todo
+    } catch (error) {
+        next(error); // Pass errors to the error handler
+    }
 });
 
 // GET ONE todo by ID
 app.get('/todos/:id', (req, res) => {
-    const Id = parseInt(req.params.id);
+    try {
+      const Id = parseInt(req.params.id);
     const todo = todos.find(t => t.id === Id);
     if (!todo) {
         return res.status(404).json({ error: 'Todo not found' });
+    }
+} catch (error) {
+        next(error); // Pass errors to the error handler    
     }
 });
 
     // JSON means JavaScript Object Notation use only for data transfer
     // request.params is use only in id  because the id is path of the url
 
-// PATCH
+// PATCH / partial update
 app.patch('/todos/:id', (req, res) => {
-    const Id = parseInt(req.params.id);
+   try {
+     const Id = parseInt(req.params.id);
     const todo = todos.find(t => t.id === Id);
     if (!todo) {
         return res.status(404).json({ error: 'Todo not found' });
     }
     Object.assign(todo, req.body);
     res.status(200).json(todo);
+    } catch (error) {
+        next(error); // Pass errors to the error handler
+    }
 });
 
 // DELETE
 app.delete('/todos/:id', (req, res) => {
-    const Id = parseInt(req.params.id);
+    try {
+        const Id = parseInt(req.params.id);
     const lengthBeforeDelete = todos.length;
     todos = todos.filter(t => t.id !== Id);
     if (todos.length === lengthBeforeDelete) {
         return res.status(404).json({ error: 'Todo not found' });
     }   
     res.status(204).send();
+    } catch (error) {
+        next(error); // Pass errors to the error handler
+    }
 });
 
+
+app.get('/todos/completed', (req, res) => {
+    try {
+       const completed = todos.filter(t => t.completed);
+    res.json(completed);
+    } catch (error) {
+        next(error); // Pass errors to the error handler
+    }
+});
+
+app.use((err, req, res, next) => {
+    res.status(500).json({ error: 'Something went wrong!' });
+});
 
 const PORT = process.env.PORT || 3000;
 
