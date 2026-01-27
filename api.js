@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');  // cors = Cross Origin Resource Sharing means to allow request from the frontend to backend
 const logRequest = require('./logger'); // Import the logger middleware
 const validateTodo = require('./validator');
+const errorHandler = require('./errorHandle');
 const app = express(); 
 // middleware to parse JSON bodies
 app.use(express.json());
@@ -34,7 +35,7 @@ app.get('/todos', (req, res) => {
 });
 
 // POST
-app.post('/todos', validateTodo, (req, res) => {
+app.post('/todos', validateTodo, (req, res, next) => {
     try
     {   
       const {task} = req.body;
@@ -54,13 +55,18 @@ app.post('/todos', validateTodo, (req, res) => {
 });
 
 // GET ONE todo by ID
-app.get('/todos/:id', (req, res) => {
+app.get('/todos/:id', (req, res, next) => {
     try {
       const Id = parseInt(req.params.id);
+      if(isNaN(Id)){
+        throw new Error('Invalid ID ');
+    }
     const todo = todos.find(t => t.id === Id);
     if (!todo) {
         return res.status(404).json({ error: 'Todo not found' });
+    
     }
+    res.json(todo);
 } catch (error) {
         next(error); // Pass errors to the error handler    
     }
@@ -70,9 +76,12 @@ app.get('/todos/:id', (req, res) => {
     // request.params is use only in id  because the id is path of the url
 
 // PATCH / partial update
-app.patch('/todos/:id', (req, res) => {
+app.patch('/todos/:id', (req, res, next) => {
    try {
      const Id = parseInt(req.params.id);
+     if(isNaN(Id)){
+        throw new Error('Invalid ID ');
+    }
     const todo = todos.find(t => t.id === Id);
     if (!todo) {
         return res.status(404).json({ error: 'Todo not found' });
@@ -85,7 +94,7 @@ app.patch('/todos/:id', (req, res) => {
 });
 
 // DELETE
-app.delete('/todos/:id', (req, res) => {
+app.delete('/todos/:id', (req, res, nest) => {
     try {
         const Id = parseInt(req.params.id);
     const lengthBeforeDelete = todos.length;
@@ -109,9 +118,7 @@ app.get('/todos/completed', (req, res) => {
     }
 });
 
-app.use((err, req, res, next) => {
-    res.status(500).json({ error: 'Something went wrong!' });
-});
+app.use(require('./errorHandle')); // Import and use the error handling middleware
 
 const PORT = process.env.PORT || 3000;
 
